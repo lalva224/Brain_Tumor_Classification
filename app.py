@@ -111,13 +111,14 @@ def load_xception_model(model_path):
         #In our final classification, we want probabilities for each class, given by softmax, the 4 neurons represent the 4 final classes.
         Dense(4,activation='softmax')
     ])
-    model.build((None,)+img_shape)
+    model.build((None,)+ img_shape)
     model.compile(Adamax(learning_rate=0.001),
                 loss = 'categorical_crossentropy',
                 metrics = ['accuracy',Precision(),Recall()]
                 )
     model.load_weights(model_path)
     return model
+
 
 st.title('Brain Tumor Classification')
 st.write('Upload an image of a brain MRI scan to classify')
@@ -127,7 +128,7 @@ uploaded_file = st.file_uploader("Choose an image...", type=['jpg','jpeg','png']
 if uploaded_file is not None:
     selected_model = st.radio(
         'Select Model',
-        ('Treansfer- Learning Model','Custom Model')
+        ('Transfer-Learning Model','Custom Model')
     )
     if selected_model =='Transfer-Learning Model':
         model = load_xception_model('xceptions_model.weights.h5')
@@ -143,12 +144,13 @@ if uploaded_file is not None:
     img_array /=255.0
 
     prediction = model.predict(img_array)
-
     class_index = np.argmax(prediction[0])
     result = labels[class_index]
 
-    st.write(f'Predicted Class: {result}')
-    st.write('Predictions:')
+    
+    st.write('# Predictions:')
+    value = prediction[0][class_index] * 100
+    st.write(f'## Predicted Class: {result} Confidence: {value:.2f}% ')
     for label, prob in zip(labels,prediction[0]):
         st.write(f'{label}: {prob:.4f}')
 
